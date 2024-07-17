@@ -1,41 +1,44 @@
 <?php
 session_start();
 require_once 'db_connection.php';
+require_once 'email_functions.php';
 
-if (!isset($_SESSION['email'])) {
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $email = filter_input(INPUT_POST, 'email', FILTER_SANITIZE_EMAIL);
+
+    $stmt = $conn->prepare("SELECT id FROM users WHERE email = ?");
+    $stmt->bind_param("s", $email);
+    $stmt->execute();
+    $result = $stmt->get_result();
+
+    if ($result->num_rows > 0) {
+        $reset_token = bin2hex(random_bytes(16));
+        $stmt = $conn->prepare("UPDATE users SET reset_token = ?, reset_token_expires = DATE_ADD(NOW(), INTERVAL 1 HOUR) WHERE email = ?");
+        $stmt->bind_param("ss", $reset_token, $email);
+        $stmt->execute();
+
+        $reset_link = "http://localhost/loginpage/reset_password.php?token=" . $reset_token;
+        if (sendPasswordResetEmail($email, $reset_link)) {
+            $_SESSION['success'] = "A password reset link has been sent to your email.";
+        } else {
+            $_SESSION['error'] = "There was an error sending the password reset email. Please try again.";
+        }
+    } else {
+        $_SESSION['error'] = "No account found with that email address.";
+    }
+
     header("Location: login.php");
     exit();
 }
 
 $error = $success = '';
-
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $otp = $_POST['otp'];
-    $email = $_SESSION['email'];
-
-    $stmt = $conn->prepare("SELECT id, otp, otp_expiry FROM users WHERE email = ? AND is_verified = 0");
-    $stmt->bind_param("s", $email);
-    $stmt->execute();
-    $result = $stmt->get_result();
-
-    if ($result->num_rows === 1) {
-        $user = $result->fetch_assoc();
-        if ($user['otp'] == $otp && strtotime($user['otp_expiry']) > time()) {
-            $update_stmt = $conn->prepare("UPDATE users SET is_verified = 1, otp = NULL, otp_expiry = NULL WHERE id = ?");
-            $update_stmt->bind_param("i", $user['id']);
-            $update_stmt->execute();
-            $update_stmt->close();
-
-            $success = "Email verified successfully. <br> You can now log in.";
-            unset($_SESSION['email']);
-        } else {
-            $error = "Invalid or expired OTP. Please try again.";
-        }
-    } else {
-        $error = "User not found or already verified.";
-    }
-
-    $stmt->close();
+if (isset($_SESSION['error'])) {
+    $error = $_SESSION['error'];
+    unset($_SESSION['error']);
+}
+if (isset($_SESSION['success'])) {
+    $success = $_SESSION['success'];
+    unset($_SESSION['success']);
 }
 ?>
 
@@ -44,7 +47,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Verify Email</title>
+    <title>Forgot Password</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
     <style>
@@ -130,8 +133,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             pointer-events: none;
         }
 
-        .input-group input {
+        .form-container input {
             padding: 12px 15px 12px 40px;
+            margin-bottom: 0;
             border: 1px solid #ddd;
             background-color: #f9f9f9;
             border-radius: 50px;
@@ -141,17 +145,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             box-sizing: border-box;
         }
 
-        .input-group input:focus {
+        .form-container input:focus {
             outline: none;
             border-color: var(--primary-color);
             box-shadow: 0 0 0 2px rgba(108, 99, 255, 0.2);
         }
 
-        .input-group input:focus + i {
+        .form-container input:focus + i {
             color: var(--primary-color);
         }
 
-        button {
+        .form-container button {
             background: var(--gradient);
             color: #fff;
             border: none;
@@ -165,9 +169,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             width: 100%;
         }
 
-        button:hover {
+        .form-container button:hover {
             opacity: 0.9;
             transform: translateY(-2px);
+        }
+
+        .back-link {
+            text-align: center;
+            margin-top: 15px;
+        }
+
+        .back-link a {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .back-link a:hover {
+            opacity: 0.8;
         }
 
         .error, .success {
@@ -192,26 +212,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <body>
     <div class="container">
         <div class="form-header">
-            <h2>Verify Your Email</h2>
+            <h2>Forgot Password</h2>
         </div>
         <div class="form-container">
+            <form action="forgot_password.php" method="post">
+                <div class="input-group">
+                    <i class="fas fa-envelope"></i>
+                    <input type="email" name="email" placeholder="Enter your email" required>
+                </div>
+                <button type="submit">Reset Password</button>
+            </form>
+            <div class="back-link">
+                <a href="login.php">Back to Login</a>
+            </div>
             <?php
             if (!empty($error)) {
-                echo "<p class='error'>$error</p>";
+                echo "<p class='error'>" . htmlspecialchars($error) . "</p>";
             }
             if (!empty($success)) {
-                echo "<p class='success'>$success</p>";
-                echo "<button onclick=\"window.location.href='login.php'\">Back to Login</button>";
-            } else {
+                echo "<p class='success'>" . htmlspecialchars($success) . "</p>";
+            }
             ?>
-            <form action="<?php echo htmlspecialchars($_SERVER['PHP_SELF']); ?>" method="post">
-                <div class="input-group">
-                    <i class="fas fa-key"></i>
-                    <input type="text" name="otp" id="otp" placeholder="Enter OTP" required>
-                </div>
-                <button type="submit">Verify</button>
-            </form>
-            <?php } ?>
         </div>
     </div>
 </body>

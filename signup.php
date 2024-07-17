@@ -75,31 +75,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $stmt->close();
 
     $hashed_password = password_hash($password, PASSWORD_DEFAULT);
+    $verification_token = bin2hex(random_bytes(16));
 
-    // Generate OTP
-    $otp = sprintf("%06d", mt_rand(1, 999999));
-    $otp_expiry = date('Y-m-d H:i:s', strtotime('+15 minutes'));
-
-    // Insert new user with unverified status
-    $stmt = $conn->prepare("INSERT INTO users (username, email, mobile, password, otp, otp_expiry, is_verified) VALUES (?, ?, ?, ?, ?, ?, 0)");
+    // Insert new user with verification token
+    $stmt = $conn->prepare("INSERT INTO users (username, email, mobile, password, verification_token, is_verified) VALUES (?, ?, ?, ?, ?, 0)");
     if ($stmt === false) {
         error_log("Error preparing statement: " . $conn->error);
         die("Error preparing statement: " . $conn->error);
     }
 
-    $stmt->bind_param("ssssss", $username, $email, $mobile, $hashed_password, $otp, $otp_expiry);
+    $stmt->bind_param("sssss", $username, $email, $mobile, $hashed_password, $verification_token);
     if ($stmt->execute()) {
         // Send verification email
-        if (sendVerificationEmail($email, $otp)) {
-            $_SESSION['email'] = $email;
-            $_SESSION['success'] = "Account created successfully. Please check your email for verification.";
-            header("Location: verify_email.php");
-            exit();
+        $verification_link = "http://localhost/loginpage/verify.php?token=" . $verification_token;
+        if (sendVerificationEmail($email, $verification_link)) {
+            $_SESSION['success'] = "Account created successfully. Please check your email to verify your account.";
         } else {
-            $_SESSION['error'] = "Error sending verification email. Please try again.";
-            header("Location: login.php");
-            exit();
+            $_SESSION['error'] = "Account created, but there was an error sending the verification email. Please contact support.";
         }
+        header("Location: login.php");
+        exit();
     } else {
         error_log("Error creating account: " . $stmt->error);
         $_SESSION['error'] = "Error creating account. Please try again.";

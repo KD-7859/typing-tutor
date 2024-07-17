@@ -2,9 +2,9 @@
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 
-require 'vendor/autoload.php'; // Make sure you have PHPMailer installed via Composer
+require 'vendor/autoload.php'; // Make sure you've installed PHPMailer via Composer
 
-function sendVerificationEmail($email, $otp) {
+function sendVerificationEmail($to, $verificationLink) {
     $mail = new PHPMailer(true);
 
     try {
@@ -13,24 +13,53 @@ function sendVerificationEmail($email, $otp) {
         $mail->Host       = 'smtp.gmail.com'; // Replace with your SMTP server
         $mail->SMTPAuth   = true;
         $mail->Username   = 'gajjarkartik74@gmail.com'; // Replace with your email
-        $mail->Password   = 'tpcg akpg pxgo dkuh'; // Replace with your email password
+        $mail->Password   = 'plyq bzzh wesg bhlf'; // Replace with your email password
         $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
         $mail->Port       = 587;
 
         //Recipients
         $mail->setFrom('gajjarkartik74@gmail.com', 'typing tutor');
-        $mail->addAddress($email);
+        $mail->addAddress($to);
 
         //Content
         $mail->isHTML(true);
-        $mail->Subject = 'Email Verification';
-        $mail->Body    = "Your verification code is: <b>$otp</b>";
+        $mail->Subject = 'Verify Your Email Address';
+        $mail->Body    = "Please click the following link to verify your email address: <a href='$verificationLink'>Verify Email</a>";
 
         $mail->send();
         return true;
     } catch (Exception $e) {
-        error_log("Message could not be sent. Mailer Error: {$mail->ErrorInfo}");
+        error_log("Error sending verification email: {$mail->ErrorInfo}");
         return false;
     }
 }
-?>
+
+function sendPasswordResetEmail($to, $resetLink) {
+    $mail = new PHPMailer(true);
+
+    try {
+        // Server settings (same as above)
+        $mail->isSMTP();
+        $mail->Host       = 'smtp.gmail.com'; // Replace with your SMTP server
+        $mail->SMTPAuth   = true;
+        $mail->Username   = 'gajjarkartik74@gmail.com'; // Replace with your email
+        $mail->Password   = 'plyq bzzh wesg bhlf'; // Replace with your email password
+        $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+        $mail->Port       = 587;
+
+        //Recipients
+        $mail->setFrom('gajjarkartik74@gmail.com', 'typing tutor');
+        $mail->addAddress($to);
+
+        //Content
+        $mail->isHTML(true);
+        $mail->Subject = 'Reset Your Password';
+        $mail->Body    = "Please click the following link to reset your password: <a href='$resetLink'>Reset Password</a>";
+
+        $mail->send();
+        return true;
+    } catch (Exception $e) {
+        error_log("Error sending password reset email: {$mail->ErrorInfo}");
+        return false;
+    }
+}
