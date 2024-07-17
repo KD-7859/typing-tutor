@@ -3,7 +3,7 @@ session_start();
 include 'db_connection.php';
 
 if (!isset($_SESSION['user_id'])) {
-    die(json_encode(['error' => 'User not logged in']));
+    die(json_encode(['status' => 'error', 'message' => 'User not logged in']));
 }
 
 $user_id = $_SESSION['user_id'];
@@ -24,8 +24,8 @@ while ($row = $result->fetch_assoc()) {
     ];
 }
 
+echo json_encode(['status' => 'success', 'history' => $history]);
+
 $stmt->close();
 $conn->close();
-
-echo json_encode($history);
 ?>

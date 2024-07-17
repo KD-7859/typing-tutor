@@ -563,43 +563,57 @@ if (!isset($_SESSION['user_id'])) {
         }
 
         function addToHistory(wpm, accuracy, errors, time) {
-            const entry = {
-                wpm,
-                accuracy,
-                errors,
-                time,
-                date: new Date().toLocaleString()
-            };
+    const entry = {
+        wpm,
+        accuracy,
+        errors,
+        time,
+        date: new Date().toLocaleString()
+    };
 
-            const li = document.createElement("li");
-            li.textContent = `WPM: ${entry.wpm} | Accuracy: ${entry.accuracy}% | Errors: ${entry.errors} | Time: ${entry.time}s | Date: ${entry.date}`;
-            historyList.prepend(li);
+    fetch('save_history.php', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            wpm: entry.wpm,
+            accuracy: entry.accuracy,
+            errors: entry.errors,
+            time: entry.time
+        }),
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'success') {
+            fetchHistory(); // Fetch and update the history after successful save
+        } else {
+            console.error('Error saving history:', data.message);
+        }
+    })
+    .catch((error) => {
+        console.error('Error:', error);
+    });
+}
 
-            while (historyList.children.length > 5) {
-                historyList.removeChild(historyList.lastChild);
+        function fetchHistory() {
+        fetch('get_history.php')
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                historyList.innerHTML = ''; // Clear existing history
+                data.history.forEach(entry => {
+                    const li = document.createElement("li");
+                    li.textContent = `WPM: ${entry.wpm} | Accuracy: ${entry.accuracy}% | Errors: ${entry.errors} | Time: ${entry.time}s | Date: ${new Date(entry.date).toLocaleString()}`;
+                    historyList.appendChild(li);
+                });
+            } else {
+                console.error('Error fetching history:', data.message);
             }
-
-            fetch('save_history.php', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    wpm: entry.wpm,
-                    accuracy: entry.accuracy,
-                    errors: entry.errors,
-                    time: entry.time
-                }),
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.status === 'error') {
-                    console.error('Error saving history:', data.message);
-                }
-            })
-            .catch((error) => {
-                console.error('Error:', error);
-            });
+        })
+        .catch((error) => {
+            console.error('Error:', error);
+        });
         }
 
         function calculateErrors(original, typed) {
@@ -769,25 +783,12 @@ if (!isset($_SESSION['user_id'])) {
         });
 
         function initialize() {
-            console.log("Time input value at initialization:", timeInput.value);
-            remainingTime = parseInt(timeInput.value);
-            updateTimerDisplay();
-            resetTest();
-            
-            fetch('get_history.php')
-            .then(response => response.json())
-            .then(data => {
-                historyList.innerHTML = ''; // Clear existing history
-                data.forEach(entry => {
-                    const li = document.createElement("li");
-                    li.textContent = `WPM: ${entry.wpm} | Accuracy: ${Math.round(entry.accuracy)}% | Errors: ${entry.errors} | Time: ${entry.time}s | Date: ${new Date(entry.date).toLocaleString()}`;
-                    historyList.appendChild(li);
-                });
-            })
-            .catch(error => {
-                console.error('Error:', error);
-            });
-        }
+    console.log("Time input value at initialization:", timeInput.value);
+    remainingTime = parseInt(timeInput.value);
+    updateTimerDisplay();
+    resetTest();
+    fetchHistory(); // Add this line
+}
 
         initialize();
     </script>

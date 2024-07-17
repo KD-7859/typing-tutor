@@ -18,7 +18,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $username = $_POST['username'];
         $password = $_POST['password'];
 
-        $stmt = $conn->prepare("SELECT id, username, password, is_verified FROM users WHERE username = ?");
+        $stmt = $conn->prepare("SELECT id, username, password, is_verified, has_paid FROM users WHERE username = ?");
         
         if ($stmt === false) {
             $error = "Error preparing statement: " . $conn->error;
@@ -35,7 +35,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     } elseif (password_verify($password, $user['password'])) {
                         $_SESSION['user_id'] = $user['id'];
                         $_SESSION['username'] = $user['username'];
-                        header("Location: index.php");
+                        if ($user['has_paid'] == 1) {
+                            header("Location: index.php");
+                        } else {
+                            header("Location: payment.php");
+                        }
                         exit();
                     } else {
                         $error = "Invalid username or password";

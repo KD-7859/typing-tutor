@@ -10,7 +10,9 @@ if (isset($_GET['token'])) {
     
     if ($stmt->execute()) {
         if ($stmt->affected_rows > 0) {
-            $_SESSION['success'] = "Your email has been verified. You can now log in.";
+            $_SESSION['success'] = "Your email has been verified. Please proceed to make the payment.";
+            header("Location: payment.php"); // Redirect to payment page
+            exit();
         } else {
             $_SESSION['error'] = "Invalid verification token.";
         }
@@ -25,4 +27,3 @@ if (isset($_GET['token'])) {
 
 header("Location: login.php");
 exit();
-?>
