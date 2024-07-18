@@ -107,32 +107,31 @@ $token = $_GET['token'] ?? '';
         }
 
         .input-group {
-            position: relative;
-            margin-bottom: 15px;
-            display: flex;
-            align-items: center;
+        position: relative;
+        margin-bottom: 15px;
+        display: flex;
+        align-items: center;
         }
 
         .input-group i {
-            position: absolute;
-            left: 15px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: #777;
-            font-size: 16px;
-            transition: all 0.3s ease;
-            pointer-events: none;
+        position: absolute;
+        left: 15px;
+        color: #777;
+        font-size: 16px;
+        transition: all 0.3s ease;
+        pointer-events: none;
         }
 
         .form-container input {
-            padding: 12px 15px 12px 40px;
-            margin-bottom: 15px;
-            border: 1px solid #ddd;
-            background-color: #f9f9f9;
-            border-radius: 50px;
-            font-size: 14px;
-            transition: all 0.3s ease;
-            width: 100%;
+        padding: 12px 15px 12px 40px;
+        margin-bottom: 0;
+        border: 1px solid #ddd;
+        background-color: #f9f9f9;
+        border-radius: 50px;
+        font-size: 14px;
+        transition: all 0.3s ease;
+        width: 100%;
+        box-sizing: border-box;
         }
 
         .form-container input:focus {

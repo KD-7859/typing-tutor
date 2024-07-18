@@ -133,10 +133,68 @@ $amount = 10000; // 100 INR
             opacity: 0.9;
             transform: translateY(-2px);
         }
+
+        .loader {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #6c63ff;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loader p {
+            color: #fff;
+            margin-top: 10px;
+        }
+
+        .error-message {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 20px;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            opacity: 0;
+            transform: translateY(-20px);
+            transition: opacity 0.3s, transform 0.3s;
+            background-color: #ff6b6b;
+            color: #fff;
+        }
+
+        .error-message i {
+            font-size: 24px;
+            margin-right: 10px;
+        }
+
+        .error-message.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
     </style>
 </head>
 <body>
-    <div class="container">
+    <div id="payment-container" class="container">
         <div class="form-header">
             <h2>Make Payment</h2>
         </div>
@@ -144,6 +202,20 @@ $amount = 10000; // 100 INR
             <p>Please make a one-time payment of 100 INR to access the Typing Tutor.</p>
             <button id="pay-button">Pay Now</button>
         </div>
+    </div>
+
+    <div id="success-container" class="container" style="display: none;">
+        <div class="form-header">
+            <h2>Payment Successful</h2>
+        </div>
+        <div class="form-container">
+            <p>Your payment has been processed successfully. You will be redirected shortly.</p>
+        </div>
+    </div>
+
+    <div id="loader" class="loader" style="display: none;">
+        <div class="spinner"></div>
+        <p>Processing payment...</p>
     </div>
 
     <script>
@@ -154,18 +226,24 @@ $amount = 10000; // 100 INR
             "name": "Typing Tutor",
             "description": "One-time access fee",
             "handler": function (response){
-                // Send the payment ID to the server for verification
+                document.getElementById('loader').style.display = 'flex';
+
                 var xhr = new XMLHttpRequest();
                 xhr.open("POST", "verify_payment.php", true);
                 xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
                 xhr.onreadystatechange = function () {
-                    if (xhr.readyState === 4 && xhr.status === 200) {
-                        var result = JSON.parse(xhr.responseText);
-                        if (result.success) {
-                            alert("Payment successful!");
-                            window.location.href = "index.php";
+                    if (xhr.readyState === 4) {
+                        document.getElementById('loader').style.display = 'none';
+
+                        if (xhr.status === 200) {
+                            var result = JSON.parse(xhr.responseText);
+                            if (result.success) {
+                                showSuccessMessage();
+                            } else {
+                                showErrorMessage();
+                            }
                         } else {
-                            alert("Payment failed. Please try again.");
+                            showErrorMessage();
                         }
                     }
                 };
@@ -179,10 +257,35 @@ $amount = 10000; // 100 INR
                 "color": "#6c63ff"
             }
         };
+
         var rzp = new Razorpay(options);
         document.getElementById('pay-button').onclick = function(e){
             rzp.open();
             e.preventDefault();
+        }
+
+        function showSuccessMessage() {
+            document.getElementById('payment-container').style.display = 'none';
+            document.getElementById('success-container').style.display = 'block';
+
+            setTimeout(function() {
+                window.location.href = "index.php";
+            }, 3000);
+        }
+
+        function showErrorMessage() {
+            var errorMessage = document.createElement('div');
+            errorMessage.className = 'error-message';
+            errorMessage.innerHTML = '<i class="fas fa-times-circle"></i><p>Payment failed. Please try again.</p>';
+            document.body.appendChild(errorMessage);
+
+            setTimeout(function() {
+                errorMessage.classList.add('show');
+            }, 100);
+
+            setTimeout(function() {
+                errorMessage.remove();
+            }, 3000);
         }
     </script>
 </body>
