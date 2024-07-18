@@ -12,358 +12,431 @@ if (!isset($_SESSION['user_id'])) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Typing Tutor</title>
+    <title>Typing Bar</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
     <style>
         :root {
-            --primary-color: #6c63ff;
-            --secondary-color: #f5f5f5;
-            --text-color: #333;
-            --error-color: #ff6b6b;
-            --success-color: #51cf66;
-            --gradient: linear-gradient(135deg, #6c63ff, #4834d4);
-        }
+    --primary-color: #6c63ff;
+    --secondary-color: #f5f5f5;
+    --text-color: #333;
+    --error-color: #ff6b6b;
+    --success-color: #51cf66;
+    --gradient: linear-gradient(135deg, #6c63ff, #4834d4);
+}
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
 
-        #stats {
-            display: flex;
-            justify-content: space-between;
-            background-color: var(--secondary-color);
-            border-radius: 12px;
-            padding: 1rem;
-            margin-top: 1.5rem;
-        }
+body {
+    font-family: 'Poppins', sans-serif;
+    background-color: var(--secondary-color);
+    color: var(--text-color);
+    background-image: 
+        radial-gradient(circle at top left, rgba(108, 99, 255, 0.1) 0%, transparent 30%),
+        radial-gradient(circle at bottom right, rgba(72, 52, 212, 0.1) 0%, transparent 30%);
+    background-size: 100% 100%;
+    background-repeat: no-repeat;
+    min-height: 100vh;
+}
 
-        .stat {
-            background-color: #fff;
-            border-radius: 8px;
-            padding: 0.5rem 1rem;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            font-weight: bold;
-            display: flex;
-            align-items: center;
-            white-space: nowrap;
-        }
+.navbar {
+    background: var(--gradient);
+    color: #fff;
+    padding: 1rem;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+}
 
-        .stat i {
-            margin-right: 0.5rem;
-            color: var(--primary-color);
-        }
+.navbar-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1rem;
+}
 
-        .stat span {
-            margin-left: 0.25rem;
-        }
-        body {
-            font-family: 'Poppins', sans-serif;
-            background-color: var(--secondary-color);
-            color: var(--text-color);
-            background-image: 
-                radial-gradient(circle at top left, rgba(108, 99, 255, 0.1) 0%, transparent 30%),
-                radial-gradient(circle at bottom right, rgba(72, 52, 212, 0.1) 0%, transparent 30%);
-            background-size: 100% 100%;
-            background-repeat: no-repeat;
-            min-height: 100vh;
-        }
+.navbar-brand {
+    color: white;
+    font-size: 1.5rem;
+    font-weight: bold;
+    text-decoration: none;
+}
 
-        .navbar {
-            background: var(--gradient);
-            color: #fff;
-            padding: 1rem;
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            z-index: 1000;
-        }
+.navbar-right {
+    display: flex;
+    align-items: center;
+}
 
-        .navbar-content {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 1rem;
-        }
+.navbar-right .username,
+.navbar-right .logout-button {
+    display: inline-block;
+    margin-right: 1rem;
+}
 
-        .navbar-brand {
-            color: white;
-            font-size: 1.5rem;
-            font-weight: bold;
-            text-decoration: none;
-        }
+.logout-button {
+    background-color: transparent;
+    color: white;
+    border: 2px solid white;
+    padding: 0.5rem 1rem;
+    border-radius: 50px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 1rem;
+}
 
-        .logout-button {
-            background-color: transparent;
-            color: white;
-            border: 2px solid white;
-            padding: 0.5rem 1rem;
-            border-radius: 50px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-size: 1rem;
-        }
+.logout-button:hover {
+    background-color: white;
+    color: var(--primary-color);
+}
 
-        .logout-button:hover {
-            background-color: white;
-            color: var(--primary-color);
-        }
+.container {
+    max-width: 800px;
+    margin: 80px auto 20px;
+    background-color: #fff;
+    border-radius: 20px;
+    box-shadow: 0 15px 30px rgba(0,0,0,0.1);
+    padding: 2rem;
+}
 
-        .container {
-            max-width: 800px;
-            margin: 80px auto 20px;
-            background-color: #fff;
-            border-radius: 20px;
-            box-shadow: 0 15px 30px rgba(0,0,0,0.1);
-            padding: 2rem;
-        }
+.controls {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+}
 
-        .controls {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 15px;
-            margin-bottom: 1.5rem;
-            flex-wrap: wrap;
-        }
+select, input[type="number"] {
+    padding: 0.7rem;
+    border: 1px solid var(--primary-color);
+    border-radius: 50px;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+}
 
-        select, input[type="number"] {
-            padding: 0.7rem;
-            border: 1px solid var(--primary-color);
-            border-radius: 50px;
-            font-size: 1rem;
-            transition: all 0.3s ease;
-        }
+select:focus, input[type="number"]:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(108, 99, 255, 0.2);
+}
 
-        select:focus, input[type="number"]:focus {
-            outline: none;
-            box-shadow: 0 0 0 2px rgba(108, 99, 255, 0.2);
-        }
+button {
+    background: var(--gradient);
+    color: #fff;
+    border: none;
+    padding: 0.7rem 1.2rem;
+    border-radius: 50px;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
 
-        button {
-            background: var(--gradient);
-            color: #fff;
-            border: none;
-            padding: 0.7rem 1.2rem;
-            border-radius: 50px;
-            cursor: pointer;
-            font-size: 1rem;
-            font-weight: 600;
-            transition: all 0.3s ease;
-        }
+button:hover {
+    opacity: 0.9;
+    transform: translateY(-2px);
+}
 
-        button:hover {
-            opacity: 0.9;
-            transform: translateY(-2px);
-        }
+#text-display {
+    font-size: 1.2rem;
+    margin-bottom: 1.5rem;
+    line-height: 1.8;
+    text-align: left;
+    background-color: #f9f9f9;
+    padding: 1.5rem;
+    border-radius: 12px;
+    border: 1px solid #e0e0e0;
+    white-space: pre-wrap;
+    position: relative;
+    overflow: hidden;
+    height: auto;
+    display: inline-block;
+    width: 100%;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+}
 
-        #text-display {
-            font-size: 1.2rem;
-            margin-bottom: 1.5rem;
-            line-height: 1.8;
-            text-align: left;
-            background-color: #f9f9f9;
-            padding: 1.5rem;
-            border-radius: 12px;
-            border: 1px solid #e0e0e0;
-            white-space: pre-wrap;
-            position: relative;
-            overflow: hidden;
-            height: auto;
-            display: inline-block;
-            width: 100%;
-            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
-        }
+.progress-bar-container {
+    margin: 1rem 0;
+    height: 10px;
+    background-color: #ddd;
+    border-radius: 5px;
+    overflow: hidden;
+}
 
-        .progress-bar-container {
-            margin: 1rem 0;
-            height: 10px;
-            background-color: #ddd;
-            border-radius: 5px;
-            overflow: hidden;
-        }
+.progress-bar {
+    height: 100%;
+    background: var(--gradient);
+    width: 0%;
+    transition: width 0.3s;
+}
 
-        .progress-bar {
-            height: 100%;
-            background: var(--gradient);
-            width: 0%;
-            transition: width 0.3s;
-        }
+#stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 1rem;
+    background-color: var(--secondary-color);
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-top: 1.5rem;
+}
 
-        #stats {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-            gap: 1rem;
-            background-color: var(--secondary-color);
-            border-radius: 12px;
-            padding: 1.5rem;
-            margin-top: 1.5rem;
-        }
+.stat {
+    text-align: center;
+    padding: 0.5rem;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    font-weight: bold;
+}
 
-        .stat {
-            text-align: center;
-            padding: 0.5rem;
-            background-color: #fff;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            font-weight: bold;
-        }
+.correct { color: var(--success-color); }
+.incorrect { 
+    color: var(--error-color); 
+    text-decoration: underline; 
+    background-color: rgba(231, 76, 60, 0.1);
+}
 
-        .correct { color: var(--success-color); }
-        .incorrect { 
-            color: var(--error-color); 
-            text-decoration: underline; 
-            background-color: rgba(231, 76, 60, 0.1);
-        }
+#history {
+    margin-top: 2rem;
+    background-color: var(--secondary-color);
+    padding: 1.5rem;
+    border-radius: 12px;
+}
 
-        #history {
-            margin-top: 2rem;
-            background-color: var(--secondary-color);
-            padding: 1.5rem;
-            border-radius: 12px;
-        }
+#history h2 {
+    margin-bottom: 1rem;
+    color: var(--primary-color);
+}
 
-        #history h2 {
-            margin-bottom: 1rem;
-            color: var(--primary-color);
-        }
+#history-list {
+    list-style-type: none;
+    padding: 0;
+}
 
-        #history-list {
-            list-style-type: none;
-            padding: 0;
-        }
+#history-list li {
+    background-color: #fff;
+    padding: 0.8rem;
+    margin-bottom: 0.8rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+}
 
-        #history-list li {
-            background-color: #fff;
-            padding: 0.8rem;
-            margin-bottom: 0.8rem;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            transition: all 0.3s ease;
-        }
+#history-list li:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
 
-        #history-list li:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
-        }
+#timer {
+    font-size: 1.2em;
+    font-weight: bold;
+    color: var(--primary-color);
+}
 
-        #timer {
-            font-size: 1.2em;
-            font-weight: bold;
-            color: var(--primary-color);
-        }
+.timer-warning {
+    animation: pulse 1s infinite;
+    color: var(--error-color);
+}
 
-        .timer-warning {
-            animation: pulse 1s infinite;
-            color: var(--error-color);
-        }
+@keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.5; }
+    100% { opacity: 1; }
+}
 
-        @keyframes pulse {
-            0% { opacity: 1; }
-            50% { opacity: 0.5; }
-            100% { opacity: 1; }
-        }
+.result-popup {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: #fff;
+    padding: 2rem;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    z-index: 1000;
+    text-align: center;
+    max-width: 400px;
+    width: 90%;
+}
 
-        .result-popup {
-            display: none;
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background-color: #fff;
-            padding: 2rem;
-            border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-            z-index: 1000;
-            text-align: center;
-            max-width: 400px;
-            width: 90%;
-        }
+.result-popup h2 {
+    color: var(--primary-color);
+    margin-bottom: 1rem;
+}
 
-        .result-popup h2 {
-            color: var(--primary-color);
-            margin-bottom: 1rem;
-        }
+.result-details {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
 
-        .result-details {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 1rem;
-            margin-bottom: 1.5rem;
-        }
+.result-item {
+    background-color: var(--secondary-color);
+    padding: 1rem;
+    border-radius: 8px;
+}
 
-        .result-item {
-            background-color: var(--secondary-color);
-            padding: 1rem;
-            border-radius: 8px;
-        }
+.result-item span {
+    display: block;
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: var(--primary-color);
+}
 
-        .result-item span {
-            display: block;
-            font-size: 1.5rem;
-            font-weight: bold;
-            color: var(--primary-color);
-        }
+.close-popup {
+    background: var(--gradient);
+    color: white;
+    border: none;
+    padding: 0.7rem 1.2rem;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: background-color 0.3s ease;
+}
 
-        .close-popup {
-            background: var(--gradient);
-            color: white;
-            border: none;
-            padding: 0.7rem 1.2rem;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 1rem;
-            transition: background-color 0.3s ease;
-        }
+.close-popup:hover {
+    opacity: 0.9;
+}
 
-        .close-popup:hover {
-            opacity: 0.9;
-        }
+.overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 999;
+}
 
-        .overlay {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
-            z-index: 999;
-        }
+#backspace-toggle.disabled {
+    background: var(--error-color);
+}
 
-        #backspace-toggle.disabled {
-            background: var(--error-color);
-        }
+.hamburger-menu {
+    display: none;
+    flex-direction: column;
+    justify-content: space-around;
+    width: 2rem;
+    height: 2rem;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    z-index: 10;
+}
 
-        @media (max-width: 768px) {
-            .container {
-                padding: 1rem;
-            }
-            .controls {
-                flex-direction: column;
-                align-items: stretch;
-            }
-            select, input[type="number"], button {
-                width: 100%;
-            }
-        }
+.hamburger-menu span {
+    width: 2rem;
+    height: 0.25rem;
+    background: white;
+    border-radius: 10px;
+    transition: all 0.3s linear;
+    position: relative;
+    transform-origin: 1px;
+}
+
+.menu-items {
+    display: none;
+    flex-direction: column;
+    justify-content: flex-start;
+    background: var(--gradient);
+    height: 100vh;
+    width: 100%;
+    text-align: left;
+    padding: 2rem;
+    position: fixed;
+    top: 0;
+    right: 0;
+    transition: transform 0.3s ease-in-out;
+    transform: translateX(100%);
+}
+
+.menu-items.open {
+    display: flex;
+    transform: translateX(0);
+}
+
+.menu-items .username {
+    color: white;
+    font-size: 1.2rem;
+    margin-bottom: 1rem;
+}
+
+.menu-items .logout-button {
+    width: 100%;
+    margin-top: 1rem;
+    opacity: 1;
+}
+
+.hamburger-menu.open span:first-child {
+    transform: rotate(45deg);
+}
+
+.hamburger-menu.open span:nth-child(2) {
+    opacity: 0;
+}
+
+.hamburger-menu.open span:nth-child(3) {
+    transform: rotate(-45deg);
+}
+
+@media (max-width: 768px) {
+    .container {
+        padding: 1rem;
+    }
+    .controls {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    select, input[type="number"], button {
+        width: 100%;
+    }
+    .hamburger-menu {
+        display: flex;
+    }
+    .navbar-right .username,
+    .navbar-right .logout-button {
+        display: none;
+    }
+    .menu-items {
+        width: 100%;
+    }
+    .logout-button {
+        margin-top: 1rem;
+    }
+}
     </style>
 </head>
 <body>
 <nav class="navbar">
-        <div class="navbar-content">
-            <a href="#" class="navbar-brand">Typing Tutor</a>
-            <div class="navbar-right">
-                <span class="username">Welcome, <?php echo $username; ?></span>
-                <button id="logout-button" class="logout-button">Logout</button>
+    <div class="navbar-content">
+        <a href="#" class="navbar-brand">Typing Bar</a>
+        <div class="navbar-right">
+            <span class="username">Welcome, <?php echo $username; ?></span>
+            <button id="logout-button" class="logout-button">Logout</button>
+            <div class="hamburger-menu">
+                <span></span>
+                <span></span>
+                <span></span>
             </div>
         </div>
-    </nav>
+    </div>
+    <div class="menu-items">
+        <span class="username">Welcome, <?php echo $username; ?></span>
+        <button id="mobile-logout-button" class="logout-button">Logout</button>
+    </div>
+</nav>
 
     <div class="container">
         <div class="controls">
@@ -403,7 +476,7 @@ if (!isset($_SESSION['user_id'])) {
 
     <div class="overlay" id="overlay"></div>
     <div class="result-popup" id="result-popup">
-        <h2>Test Results</h2>
+    <h2>Test Results</h2>
         <div class="result-details">
             <div class="result-item">
                 <i class="fas fa-tachometer-alt"></i>
@@ -563,57 +636,57 @@ if (!isset($_SESSION['user_id'])) {
         }
 
         function addToHistory(wpm, accuracy, errors, time) {
-    const entry = {
-        wpm,
-        accuracy,
-        errors,
-        time,
-        date: new Date().toLocaleString()
-    };
+            const entry = {
+                wpm,
+                accuracy,
+                errors,
+                time,
+                date: new Date().toLocaleString()
+            };
 
-    fetch('save_history.php', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-            wpm: entry.wpm,
-            accuracy: entry.accuracy,
-            errors: entry.errors,
-            time: entry.time
-        }),
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.status === 'success') {
-            fetchHistory(); // Fetch and update the history after successful save
-        } else {
-            console.error('Error saving history:', data.message);
+            fetch('save_history.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    wpm: entry.wpm,
+                    accuracy: entry.accuracy,
+                    errors: entry.errors,
+                    time: entry.time
+                }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    fetchHistory();
+                } else {
+                    console.error('Error saving history:', data.message);
+                }
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+            });
         }
-    })
-    .catch((error) => {
-        console.error('Error:', error);
-    });
-}
 
         function fetchHistory() {
-        fetch('get_history.php')
-        .then(response => response.json())
-        .then(data => {
-            if (data.status === 'success') {
-                historyList.innerHTML = ''; // Clear existing history
-                data.history.forEach(entry => {
-                    const li = document.createElement("li");
-                    li.textContent = `WPM: ${entry.wpm} | Accuracy: ${entry.accuracy}% | Errors: ${entry.errors} | Time: ${entry.time}s | Date: ${new Date(entry.date).toLocaleString()}`;
-                    historyList.appendChild(li);
-                });
-            } else {
-                console.error('Error fetching history:', data.message);
-            }
-        })
-        .catch((error) => {
-            console.error('Error:', error);
-        });
+            fetch('get_history.php')
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    historyList.innerHTML = '';
+                    data.history.forEach(entry => {
+                        const li = document.createElement("li");
+                        li.textContent = `WPM: ${entry.wpm} | Accuracy: ${entry.accuracy}% | Errors: ${entry.errors} | Time: ${entry.time}s | Date: ${new Date(entry.date).toLocaleString()}`;
+                        historyList.appendChild(li);
+                    });
+                } else {
+                    console.error('Error fetching history:', data.message);
+                }
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+            });
         }
 
         function calculateErrors(original, typed) {
@@ -631,7 +704,7 @@ if (!isset($_SESSION['user_id'])) {
             clearInterval(timerInterval);
 
             const endTime = new Date().getTime();
-            const timeElapsed = (endTime - startTime) / 1000; // in seconds
+            const timeElapsed = (endTime - startTime) / 1000;
 
             const wordsTyped = typedText.trim().split(/\s+/).length;
             const wpm = Math.round((wordsTyped / timeElapsed) * 60);
@@ -665,7 +738,7 @@ if (!isset($_SESSION['user_id'])) {
         function updateStats() {
             if (isTestActive) {
                 const currentTime = new Date().getTime();
-                const timeElapsed = (currentTime - startTime) / 1000 / 60; // in minutes
+                const timeElapsed = (currentTime - startTime) / 1000 / 60;
 
                 const wordsTyped = typedText.trim().split(/\s+/).length;
                 const wpm = Math.round(wordsTyped / timeElapsed);
@@ -744,7 +817,7 @@ if (!isset($_SESSION['user_id'])) {
         timeInput.addEventListener('change', () => {
             let newValue = parseInt(timeInput.value);
             if (isNaN(newValue) || newValue < 1) {
-                newValue = 60; // Default to 60 seconds if invalid input
+                newValue = 60;
             }
             timeInput.value = newValue;
             remainingTime = newValue;
@@ -767,28 +840,47 @@ if (!isset($_SESSION['user_id'])) {
         document.getElementById('overlay').addEventListener('click', hideResultPopup);
 
         document.addEventListener('DOMContentLoaded', () => {
-            const logoutButton = document.getElementById('logout-button');
-            
-            logoutButton.addEventListener('click', () => {
-                fetch('logout.php', {
-                    method: 'POST',
-                    credentials: 'same-origin'
-                }).then(() => {
-                    window.location.href = 'login.php';
-                }).catch(error => {
-                    console.error('Error:', error);
-                    alert('An error occurred during logout. Please try again.');
-                });
-            });
+    const logoutButton = document.getElementById('logout-button');
+    const mobileLogoutButton = document.getElementById('mobile-logout-button');
+    const hamburgerMenu = document.querySelector('.hamburger-menu');
+    const menuItems = document.querySelector('.menu-items');
+    
+    function logout() {
+        fetch('logout.php', {
+            method: 'POST',
+            credentials: 'same-origin'
+        }).then(() => {
+            window.location.href = 'login.php';
+        }).catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred during logout. Please try again.');
         });
+    }
+
+    logoutButton.addEventListener('click', logout);
+    mobileLogoutButton.addEventListener('click', logout);
+
+    hamburgerMenu.addEventListener('click', () => {
+        hamburgerMenu.classList.toggle('open');
+        menuItems.classList.toggle('open');
+    });
+
+    // Close menu when clicking outside
+    document.addEventListener('click', (event) => {
+        if (!hamburgerMenu.contains(event.target) && !menuItems.contains(event.target)) {
+            hamburgerMenu.classList.remove('open');
+            menuItems.classList.remove('open');
+        }
+    });
+});
 
         function initialize() {
-    console.log("Time input value at initialization:", timeInput.value);
-    remainingTime = parseInt(timeInput.value);
-    updateTimerDisplay();
-    resetTest();
-    fetchHistory(); // Add this line
-}
+            console.log("Time input value at initialization:", timeInput.value);
+            remainingTime = parseInt(timeInput.value);
+            updateTimerDisplay();
+            resetTest();
+            fetchHistory();
+        }
 
         initialize();
     </script>
